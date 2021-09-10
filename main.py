@@ -37,7 +37,7 @@ try:
     current_row = 1
     width = 10
 
-    for current_page in range(17,30):
+    for current_page in range(17,19):
         print(f"  page {current_page}... ")
 
         results = s.get(f"{base_url}/notebook/?page={current_page}&ordem=menor-preco")
@@ -45,16 +45,58 @@ try:
 
         p = re.compile('U\$[^0-9]+([0-9,]+)')
 
+        # find all products on the page
         for row in parsed.find_all('div', 'promocao-produtos-item-text'):
-            for a in row.find_all('a', 'truncate'):
-                text = str.strip(a.getText())
-                if width < len(text):
-                    width = len(text) 
-                worksheet.write_url(f'A{current_row}', f"{base_url}{a['href']}", string=text)
-            for a in row.find_all('div', 'promocao-item-preco-oferta'):
-                text = str.strip(a.getText())
-                result = p.search(text)
-                worksheet.write(f'B{current_row}', result.group(1) if result else None)
+
+            # extract link
+            a = row.find('a', 'truncate')
+
+            # get parsed name
+            text = str.strip(a.getText())
+            if width < len(text):
+                width = len(text) 
+
+            # extract link address
+            href = f"{base_url}{a['href']}"
+
+            print(text)
+
+            # write name and hyperlink on the corresponding cell
+            worksheet.write_url(f'A{current_row}', href, string=text)
+
+            # extract details of the notebook
+            results = s.get(href)
+            parsed = BeautifulSoup(results.content, "html.parser")
+
+            info_columns = {
+                    'Tamanho da Tela': 'C',
+                    'Série de Processador': 'D',
+                    'Processador': 'D',
+                    'HD': 'E',
+                    'Capacidade de Armazenamento': 'F',
+                    'Placa de Vídeo	': 'G',
+                    'Memoria RAM': 'H',
+                    'Gráficos': 'I',
+            }
+
+            t = parsed.find('table', 'table table-details table-hover table-striped')
+            for info in t.find_all('tr'):
+                if info.td:
+                    name  = info.td.text
+                    value = info.td.next_sibling.text
+                    column_letter = info_columns.get(name)
+                    if column_letter:
+                        print(f'{column_letter}{current_row}: {value}')
+                        worksheet.write(f'{column_letter}{current_row}', value)
+
+            # extract price
+            a = row.find('div', 'promocao-item-preco-oferta')
+            text = str.strip(a.getText())
+            result = p.search(text)
+
+            # write price on the corresponding cell
+            worksheet.write(f'B{current_row}', result.group(1) if result else None)
+
             current_row = current_row + 1
 
     worksheet.set_column(0, 0, width)
