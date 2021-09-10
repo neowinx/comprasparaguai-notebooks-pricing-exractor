@@ -52,41 +52,40 @@ momo = [
     'Notebook HP 15-DY1025NR i3-1005G1 15.6" W10H 4/256GB SSD - Silver (Refurbished)'
 ]
 
-#p = re.compile('(.+)(I[357]^1( |-)|,|/|INTEL|AMD)')
-p = re.compile('(.+)(I[357]( |-|/)|CELERON|AMD|RYZEN|INTEL)')
+parsers = list(map(lambda x: re.compile(x), [
+    'NTB HP (.+) I\d',
+    'NOTEBOOK (.+) I\d',
+    'NOTEBOOK (.+) RYZEN',
+    'NOTEBOOK (.+) INTEL CORE',
+    'NOTEBOOK (.+) INTEL',
+    'NOTEBOOK ([ A-Z0-9-."]+) AMD',
+    #'DELL NB (.+) I\d',
+    '^NOTEBOOK HP ([A-Z0-9-].+)\dGB',
+    'HP,? INTEL PENTIUM, ([ A-Z0-9-]+), ',
+    'HP,? ([ A-Z0-9-]+), ',
+    'NOTEBOOK ([ A-Z0-9-.]+)/',
+    '([ A-Z0-9-]+) - ',
+    '([ A-Z0-9-]+)/',
+    '([ A-Z0-9-]+), ',
+]))
 
 options = Options()
 options.headless = True
 browser = webdriver.Chrome(options=options)
 
-def parse_desc(description):
-    # prefixes terms and initial weights 
-    prefixes = [
-        {'t': ',', 'w': 10},
-        {'t': '/', 'w': 8},
-        {'t': 'I3', 'w': 5},
-        {'t': 'I5', 'w': 5},
-        {'t': 'I7', 'w': 5},
-        {'t': 'INTEL CORE', 'w': 7},
-        {'t': 'INTEL', 'w': 5},
-        {'t': 'AMD', 'w': 5},
-        {'t': 'RYZEN', 'w': 5},
-        {'t': 'CELERON', 'w': 5},
-        {'t': 'PENTIUM', 'w': 5},
-        {'t': 'INTEL PENTIUM', 'w': 7}
-    ] 
+def prepare_desc(description):
+    desc = description.upper()
+    return desc
+
+def parse_desc(desc):
+
+    def search_heuristic(x, y):
+        return y.search(desc) if not x else x
     
-    desc = description.upper().strip()
-
-    def assign_pos(x):
-        x['p'] = desc.find(x['t'])
-        return x
-
-    prefixes_positions = map(assign_pos, prefixes)
-
-    sorted_positions = sorted(filter(lambda y: y['p'] != -1, prefixes_positions), key=lambda x: x['p'], reverse=True)
-
-    print(desc[:sorted_positions[0]['p']])
+    found = reduce(search_heuristic, parsers, None)
+    
+    # TODO: find a way to configure if the parser returns group(0) or group(1)
+    return found.group(1) if found else None
 
 def return_info(desc):
     print("==========================")
@@ -117,8 +116,8 @@ def return_info(desc):
 
 
 for description in momo:
-    pardes = parse_desc(description)
-    # print(pardes)
+    pardes = parse_desc(prepare_desc(description))
+    print(pardes)
     # info = return_info(description)
     # print(f'  info: {info}')
 
