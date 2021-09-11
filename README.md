@@ -7,7 +7,7 @@ Scrapper experiment to extract price information from comprasparaguai
 ## Requirements
 
 - [Python 3.9+](https://www.python.org/downloads/)
-- The latest version of [chromedriver](https://chromedriver.chromium.org/downloads) installed in your `$PATH` (you could use one of the webdriver's (ex selenium) webdriver if you wish (asuming you also change the required declaration in `main.py`)
+- The latest version of [chromedriver](https://chromedriver.chromium.org/downloads) installed in your `$PATH` (you could use one of the other [selenium webdrivers](https://pypi.org/project/selenium/#drivers) if you wish (asuming you also change the required declaration in `main.py`)
 
 ## Usage
 
@@ -31,4 +31,4 @@ If you need improvements and other stuff just place them at the [issues](https:/
 
 Regards
 
-neowinx
+[neowinx](https://github.com/neowinx)
