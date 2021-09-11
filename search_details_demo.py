@@ -70,29 +70,28 @@ parsers = list(map(lambda x: re.compile(x), [
 ]))
 
 options = Options()
-options.headless = True
+#options.headless = True
 browser = webdriver.Chrome(options=options)
 
-def prepare_desc(description):
-    desc = description.upper()
-    return desc
-
 def parse_desc(desc):
+    sp = desc.upper().split('/')[0]
+    sp1 = ''
+    for word in sp.split(' '):
+        if ('GB' in word 
+                or 'PRETO' in word
+                or 'PRATA' in word
+                or 'TELA' in word):
+            break
+        sp1 += ' ' + word.replace('ACR', 'ACER').replace('NOTEBOOK', '')
+    sp2 = ''
+    for word in sp1.strip().split(' '):
+        if 'I3' in word:
+            break
+        sp2 += ' ' + word
+    return sp2.strip()
 
-    def search_heuristic(x, y):
-        return y.search(desc) if not x else x
-    
-    found = reduce(search_heuristic, parsers, None)
-    
-    # TODO: find a way to configure if the parser returns group(0) or group(1)
-    return found.group(1) if found else None
 
-def return_info(desc):
-    print("==========================")
-    print(desc)
-    desc = description.upper().replace('NOTEBOOK','').replace('ACR', 'ACER').strip()
-    matches = p.search(desc)
-    search_term = matches.group(1) if matches else desc
+def return_info(search_term):
     print(f'search_term: {search_term}')
     
     search_url = f'https://www.google.com/search?q={"+".join(search_term.strip().split(" "))}+characteristics+processor&ie=utf-8&oe=utf-8'
@@ -110,15 +109,17 @@ def return_info(desc):
             if len(filtered) > 0:
                 return filtered[0]
     except Exception as ex:
-        print(f'  xpdopen not found for {desc}')
+        print(f'  xpdopen not found for {search_term}')
     
     return None
 
 
 for description in momo:
-    pardes = parse_desc(prepare_desc(description))
+    print("==========================")
+    print(description)
+    pardes = parse_desc(description)
     print(pardes)
-    # info = return_info(description)
-    # print(f'  info: {info}')
+    info = return_info(pardes)
+    print(f'  info: {info}')
 
 
