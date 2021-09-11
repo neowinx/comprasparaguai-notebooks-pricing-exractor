@@ -9,7 +9,9 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 
-momo = [
+from processors import processors
+
+descriptions = [
     'Notebook Acr A315-56-31HU i3 1.2/4G/1TB 15.6',
     'Notebook Lenovo Ideapad 3 15ITL05 i3-1115G4 3.0GHZ/ 4GB/ 128GB SSD/ 15.6"FHD/ W10/ Ingles Abyss Azul',
     'Notebook Dell 3000-3511 Intel i3 de 11/ 4GB/ 128GB SSD/ 15.6" FHD/ W10',
@@ -70,7 +72,7 @@ parsers = list(map(lambda x: re.compile(x), [
 ]))
 
 options = Options()
-#options.headless = True
+options.headless = True
 browser = webdriver.Chrome(options=options)
 
 def parse_desc(desc):
@@ -114,12 +116,25 @@ def return_info(search_term):
     return None
 
 
-for description in momo:
+def match_processor_in_description(descs):
+    l = []
+    for d in descs:
+        n = {'description': d}
+        for p in processors:
+            if p in d['name']:
+                n['name'] = p['name']
+                n['count'] = p['count']
+                break
+        l.append(n)
+    return l
+
+for description in descriptions:
     print("==========================")
     print(description)
+    l = match_processor_in_description(processors)
     pardes = parse_desc(description)
-    print(pardes)
-    info = return_info(pardes)
-    print(f'  info: {info}')
+    #print(pardes)
+    #info = return_info(pardes)
+    #print(f'  info: {info}')
 
 
