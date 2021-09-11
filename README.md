@@ -15,6 +15,7 @@ Scrapper experiment to extract price information from comprasparaguai
 ```bash
 virtualenv venv
 . ./venv/bin/activate
+pip install -r requirements.txt
 python main.py
 ```
 
@@ -22,6 +23,7 @@ python main.py
 ```cmd
 virtualenv venv
 .\venv\Scripts\activate.bat
+pip install -r requirements.txt
 python main.py
 ```
 
